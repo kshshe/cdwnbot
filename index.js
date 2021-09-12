@@ -16,8 +16,25 @@ const wait = (seconds) =>
     setTimeout(res, seconds * 1000);
   });
 
+const declOfNum = (number, titles) => {
+  const cases = [2, 0, 1, 1, 1, 2];
+  return titles[
+    number % 100 > 4 && number % 100 < 20
+      ? 2
+      : cases[number % 10 < 5 ? number % 10 : 5]
+  ];
+};
+
 const getText = (seconds, secondsLeft) => {
-  return `${secondsLeft} / ${seconds}`;
+  return `${declOfNum(secondsLeft, [
+    "Осталась",
+    "Осталось",
+    "Осталось",
+  ])} ${secondsLeft} ${declOfNum(secondsLeft, [
+    "секунда",
+    "секунды",
+    "секунд",
+  ])} из ${seconds}`;
 };
 
 const createCountdownMessage = async (ctx, seconds) => {
@@ -40,6 +57,10 @@ const createCountdownMessage = async (ctx, seconds) => {
       );
     }
   }
+  await ctx.telegram.sendMessage(ctx.chat.id, "Время вышло", {
+    reply_to_message_id: message_id,
+    allow_sending_without_reply: true,
+  });
 };
 
 bot.on("text", (ctx) => {
