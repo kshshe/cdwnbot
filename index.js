@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
+const moment = require("moment");
 
 const bot = new Telegraf(process.env.TOKEN);
 
@@ -11,20 +12,23 @@ bot.start((ctx) =>
   ),
 );
 
-const waitForSecond = () =>
+const wait = (seconds) =>
   new Promise((res) => {
-    setTimeout(res, 1000);
+    setTimeout(res, seconds * 1000);
   });
 
 const createCountdownMessage = async (ctx, seconds) => {
-  const { message_id } = await ctx.reply(`${seconds}`);
-  while (seconds-- > 0) {
-    await waitForSecond();
+  const secondsLeft = seconds;
+  const { message_id } = await ctx.reply(`${secondsLeft} / ${seconds}`);
+  while (secondsLeft > 0) {
+    const nextStep = Math.ceil(secondsLeft / 10);
+    secondsLeft -= nextStep;
+    await wait(nextStep);
     await ctx.telegram.editMessageText(
       ctx.chat.id,
       message_id,
       undefined,
-      seconds,
+      `${secondsLeft} / ${seconds}`,
     );
   }
 };
