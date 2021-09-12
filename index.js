@@ -1,9 +1,6 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
-const moment = require("moment");
-require("moment/locale/ru");
 
-moment.locale("ru");
 const bot = new Telegraf(process.env.TOKEN);
 
 bot.catch((err) => console.error(err));
@@ -19,23 +16,29 @@ const wait = (seconds) =>
     setTimeout(res, seconds * 1000);
   });
 
+const getText = (seconds, secondsLeft) => {
+  return `${secondsLeft} / ${seconds}`;
+};
+
 const createCountdownMessage = async (ctx, seconds) => {
   let secondsLeft = seconds;
-  const durationTotal = () => moment.duration(seconds, "seconds").humanize();
-  const durationLeft = () => moment.duration(secondsLeft, "seconds").humanize();
-  const { message_id } = await ctx.reply(
-    `${durationLeft()} / ${durationTotal()}`,
-  );
+  const text = getText(seconds, secondsLeft);
+  let lastText = text;
+  const { message_id } = await ctx.reply(text);
   while (secondsLeft > 0) {
     const nextStep = Math.ceil(secondsLeft / 10);
     secondsLeft -= nextStep;
     await wait(nextStep);
-    await ctx.telegram.editMessageText(
-      ctx.chat.id,
-      message_id,
-      undefined,
-      `${durationLeft()} / ${durationTotal()}`,
-    );
+    const text = getText(seconds, secondsLeft);
+    if (text !== lastText) {
+      lastText = text;
+      await ctx.telegram.editMessageText(
+        ctx.chat.id,
+        message_id,
+        undefined,
+        text,
+      );
+    }
   }
 };
 
