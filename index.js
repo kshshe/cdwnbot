@@ -1,7 +1,9 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const moment = require("moment");
+import "moment/locale/ru";
 
+moment.locale("ru");
 const bot = new Telegraf(process.env.TOKEN);
 
 bot.catch((err) => console.error(err));
@@ -18,8 +20,12 @@ const wait = (seconds) =>
   });
 
 const createCountdownMessage = async (ctx, seconds) => {
-  const secondsLeft = seconds;
-  const { message_id } = await ctx.reply(`${secondsLeft} / ${seconds}`);
+  let secondsLeft = seconds;
+  const durationTotal = () => moment.duration(seconds, "seconds").humanize();
+  const durationLeft = () => moment.duration(secondsLeft, "seconds").humanize();
+  const { message_id } = await ctx.reply(
+    `${durationLeft()} / ${durationTotal()}`,
+  );
   while (secondsLeft > 0) {
     const nextStep = Math.ceil(secondsLeft / 10);
     secondsLeft -= nextStep;
@@ -28,7 +34,7 @@ const createCountdownMessage = async (ctx, seconds) => {
       ctx.chat.id,
       message_id,
       undefined,
-      `${secondsLeft} / ${seconds}`,
+      `${durationLeft()} / ${durationTotal()}`,
     );
   }
 };
