@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const moment = require("moment");
-import "moment/locale/ru";
+require("moment/locale/ru");
 
 moment.locale("ru");
 const bot = new Telegraf(process.env.TOKEN);
